@@ -1,0 +1,38 @@
+---
+title: "Replication of a visual search experiment by Najemnik & Geisler (2005, Nature)"
+author: "Hyunwoo Gu (hwgu@stanford.edu)"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+format: pdf
+---
+
+<!-- Replication reports should all use this template to standardize reporting across projects.  These reports will be public supplementary materials that accompany the summary report(s) of the aggregate results. -->
+
+## Introduction
+Visual search is an active visual scan of environmental scenes, commonly taking place in everyday situations for people with vision. The visual search experiment by Najemnik & Geisler (2005) is of particular interest, since it presents a rigorous methodology that can be applied for studying the process of naturalistic visual scene understanding. Because the authors only presented the data from themselves as experiment subjects, it is worth considering a replication study with a participant pool naive to the purpose of the experiment.
+
+The experimental stimulus was a windowed sine-wave grating randomly positioned (or not) in the background of spatial $1/f$ noise. The task was to find the target as quickly as possible and press a button when the target is located, starting from the central fixation point for each trial. An expected challenge will be to implement the ideal search model, as the main analysis is to compare human behavior to random versus ideal search models.
+
+#### Links
+-   [Project repository](https://github.com/psych251/najemnik2005)
+-   [Original paper](https://github.com/psych251/najemnik2005/blob/main/original_paper/najemnik2005.pdf)
+
+## Methods
+
+### Power Analysis
+No formal statistical testing was reported in the original paper.
+
+### Planned Sample
+Planned sample size is $N=2$, with $192$ trials across $6$ blocks, following the original paper.
+
+### Materials
+> Stimuli were presented on a calibrated monochrome Image Systems monitor (M21L) with a white phosphor (P-104) and resolution $1024 \times 768$ at $60$Hz. Eye position was measured with a Forward Technologies SRI Version 6 dual Purkinje eye tracker. Head position was maintained with a bite bar and headrest.
+
+For the replication study, the eye position will be measured with EyeLink 1000 Plus.
+
+### Procedure
+> On each trial, the observer first fixated a dot at the centre of the display and then initiated the trial with a button press. The fixation dot disappeared immediately and a random time later (100–500 ms) the search display appeared. The observer’s task was to find the target as rapidly as possible and to press a button as soon as the target was located. The observer then indicated the judged target location by fixating that location and pressing the button again. The response was considered correct if the eye position at the time of the second button press was closer to the target location than to any other potential target location. Each session consisted of 6 blocks of 32 search trials. In each session the background noise contrast was fixed. Before each block, the eye tracker was calibrated and the search target for that block was shown on a uniform background at the centre of the display. The set of 12 conditions was repeated 6 times in a counterbalanced fashion.
+
+### Analysis Plan
+An ideal searcher model versus random searcher model will be compared to human data - number of fixations. 
+
+### Differences from Original Study
