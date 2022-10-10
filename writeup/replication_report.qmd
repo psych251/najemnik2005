@@ -2,7 +2,7 @@
 title: "Replication of a visual search experiment by Najemnik & Geisler (2005, Nature)"
 author: "Hyunwoo Gu (hwgu@stanford.edu)"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
-format: pdf
+format: html
 ---
 
 <!-- Replication reports should all use this template to standardize reporting across projects.  These reports will be public supplementary materials that accompany the summary report(s) of the aggregate results. -->
@@ -14,7 +14,7 @@ The experimental stimulus was a windowed sine-wave grating randomly positioned (
 
 #### Links
 -   [Project repository](https://github.com/psych251/najemnik2005)
--   [Original paper](https://github.com/psych251/najemnik2005/blob/main/original_paper/najemnik2005.pdf)
+-   [Original paper](https://github.com/psych251/najemnik2005/blob/master/original_paper/najemnik2005.pdf)
 
 ## Methods
 
