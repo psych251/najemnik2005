@@ -26,6 +26,8 @@
 # Other
 *.httr-oauth
 *.DS_Store
+dev/
+**/data/
 
 # MTurk credentials and data
 auth.json

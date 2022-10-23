@@ -2,6 +2,7 @@
 title: "Replication of a visual search experiment by Najemnik & Geisler (2005, Nature)"
 author: "Hyunwoo Gu (hwgu@stanford.edu)"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
+# bibliography: reference.bibtex
 format: html
 ---
 
@@ -10,29 +11,121 @@ format: html
 ## Introduction
 Visual search is an active visual scan of environmental scenes, commonly taking place in everyday situations for people with vision. The visual search experiment by Najemnik & Geisler (2005) is of particular interest, since it presents a rigorous methodology that can be applied for studying the process of naturalistic visual scene understanding. Because the authors only presented the data from themselves as experiment subjects, it is worth considering a replication study with a participant pool naive to the purpose of the experiment.
 
-The experimental stimulus was a windowed sine-wave grating randomly positioned (or not) in the background of spatial $1/f$ noise. The task was to find the target as quickly as possible and press a button when the target is located, starting from the central fixation point for each trial. An expected challenge will be to implement the ideal search model, as the main analysis is to compare human behavior to random versus ideal search models.
+The experimental stimulus was a windowed sine-wave grating randomly positioned (or not) in the background of spatial $1/f$ noise. The task was to find the target as quickly as possible and press a button when the target is located, starting from the central fixation point for each trial. An expected challenge will be to implement the ideal searcher model, as the main analysis is to compare human behavior to random versus ideal searcher models.
 
 #### Links
 -   [Project repository](https://github.com/psych251/najemnik2005)
 -   [Original paper](https://github.com/psych251/najemnik2005/blob/master/original_paper/najemnik2005.pdf)
+-   [Experimental paradigm](https://hyunwoogu.github.io/exp/visual_search) (Demo-only. Under construction.)
+
 
 ## Methods
 
 ### Power Analysis
-No formal statistical testing was reported in the original paper.
+No formal statistical testing was reported in the original paper. 
+
+Nonetheless, it is possible to construct a statistical test relevant to the main finding ([Figure 4a](#original_figure)). Here, I will use the [nested linear model comparison](#key_analysis) to test whether the observed human data differs from the random searcher prediction, under two levels of background noise contrast. The corresponding effect size will be $\eta^2$. To perform power analysis, the original effect size will be estimated from the original figure.
 
 ### Planned Sample
-Planned sample size is $N=2$, with $192$ trials across $6$ blocks, following the original paper.
+Planned sample size is $N=2$, with $192$ trials across $6$ blocks, following the original paper. Since the experiment requires precise eye tracking, participants will be recruited to join an in-lab experiment setting. Only participants with normal or corrected-to-normal vision will join this study. 
+
+To ensure the psychophysics data quality, any participants with less than $70\%$ detection accuracy will be excluded from the analysis. To ensure eye-tracking data quality, a calibration trial will be performed before each block. Data from any failure to obtain reliable a scan path will be excluded before analysis. Fixations and saccades will be detected with EyeLink’s built-in algorithm.
 
 ### Materials
-> Stimuli were presented on a calibrated monochrome Image Systems monitor (M21L) with a white phosphor (P-104) and resolution $1024 \times 768$ at $60$Hz. Eye position was measured with a Forward Technologies SRI Version 6 dual Purkinje eye tracker. Head position was maintained with a bite bar and headrest.
+Quoted from the original paper:
 
-For the replication study, the eye position will be measured with EyeLink 1000 Plus.
+> Stimuli were presented on a calibrated monochrome Image Systems monitor (M21L) with a white phosphor (P-104) and resolution $1024 \times 768$ pixels at $60$Hz. Eye position was measured with a Forward Technologies SRI Version 6 dual Purkinje eye tracker. Head position was maintained with a bite bar and headrest.
+
+For the replication study, the stimuli will be presented on a CRT monitor (Trinitron 21-inch flat screen; Dell Computer Company) with the resolution of $1280 \times 960$ pixels at $100$Hz. Eye position will be measured with EyeLink 1000 Plus. Head position will be maintained with Tobii chin rest.
 
 ### Procedure
+Quoted from the original paper:
+
 > On each trial, the observer first fixated a dot at the centre of the display and then initiated the trial with a button press. The fixation dot disappeared immediately and a random time later (100–500 ms) the search display appeared. The observer’s task was to find the target as rapidly as possible and to press a button as soon as the target was located. The observer then indicated the judged target location by fixating that location and pressing the button again. The response was considered correct if the eye position at the time of the second button press was closer to the target location than to any other potential target location. Each session consisted of 6 blocks of 32 search trials. In each session the background noise contrast was fixed. Before each block, the eye tracker was calibrated and the search target for that block was shown on a uniform background at the centre of the display. The set of 12 conditions was repeated 6 times in a counterbalanced fashion.
 
-### Analysis Plan
-An ideal searcher model versus random searcher model will be compared to human data - number of fixations. 
+### Analysis Plan<a name="key_analysis"></a>
+
+**Key analysis of interest**. I will test whether human participants' number of fixations differs from the prediction of the random searcher model, given different levels of search target visibility and background noise contrast. To test this, the nested linear model comparison will be used as follows.
+
++ Null linear model: $(\mathrm{\#Fixations}) \sim (\mathrm{Target\ \ visibility}) \ast (\mathrm{Noise\ \ contrast})$
++ Full linear model: $(\mathrm{\#Fixations}) \sim (\mathrm{Target\ \ visibility}) \ast (\mathrm{Noise\ \ contrast}) \ast (\mathrm{Searcher})$
+
+where $\ast$ denotes interaction, and the indicator variable `Searcher` specifies whether the data is from human or random searchers. The likelihood ratio test between the null and full models will be used for analysis, and $\eta^2$ will be computed to provide a comparable effect size.
+
+**Secondary analysis**. Along with the main analysis, I will also compare whether participants behavior differs from the prediction of the ideal searcher model. Commonly, the model comparison is based on the model likelihoods, i.e. $p\left( 
+\mathrm{\#Fixations} \vert \mathrm{Searcher\ \ Model} \right)$; however, the exact computation of the likelihood for the ideal searcher model is very convoluted and omitted from the original study, thus beyond the scope of this replication study. Alternatively, I will follow the same strategy of nested linear model comparison as above, but with the `Searcher` variable specifying whether data is from human or ideal searchers. 
+
+**Model simulations**. Following the original study, the behaviors of random and ideal searchers will be simulated. These searchers' target probability map is defined as follows.
+
+$$
+\begin{align}
+p_i(T) &= \frac{ \displaystyle \mathrm{prior}(i) \exp \left( \sum_{t=1}^T d'^2_{ik(t)} W_{ik(t)} \right) }{ \displaystyle \sum_{j=1}^n \mathrm{prior}(j) \exp \left( \sum_{t=1}^T d'^2_{jk(t)} W_{jk(t)} \right) } \tag{1}
+\end{align}
+$$
+where $p_i(T)$: the posterior probability that the target is at location $i$ given $T$ fixations, $\mathrm{prior}(i)$: the prior probability that the target is at location $i$, $k(t)$: the location of $t$-th fixation, $d'_{ik(t)}$: the visibility from $k(t)$ to location $i$, and $W_{ik(t)}$: template response representing evidence obtained at location $i$ about the target from fixation at $k(t)$. The ideal searcher selects the next target $k^\ast(T+1)$ using the following formula given $p_i(T)$.
+
+$$
+\begin{align}
+k^\ast(T+1) &= \operatorname{argmax}_{k(T+1)} \left( \sum_{i=1}^n p_i(T) p(C \vert i, k(T+1)) \right)  \tag{2}
+\end{align}
+$$
+where $p(C \vert i, k(T+1))$: the probability of correct identification of the target at location $i$ from fixation at $k(T+1)$. The random searcher selects the next target randomly from possible locations. The procedure for simulation is quoted from the original paper:
+
+> The six steps for each simulated search trial were as follows. First, fixation began at the centre of the display (as in the search experiment). Second, a target location was selected at random ($\mathrm{prior}(i)= 1/85$); $0.5$ was added to that location and $-0.5$ to all other locations. Third, a gaussian noise sample was generated for each of the $85$ potential target locations. The standard deviation of each noise sample was set to be consistent with the value of the visibility map at that location: $\sigma=1/d'$. Fourth, the posterior probability for each potential target location was calculated from equation (1). Fifth, if the maximum posterior probability exceeded a criterion, the search stopped. The criterion for each condition was picked so that the error rate of the ideal searcher approximated that of the humans. Sixth, for the ideal searcher, equation (2) was evaluated to select the next fixation location; for the random searcher, the next fixation location was selected at random. The process then jumped back to the third step. Note that the specific characteristics of the target and $1/f$ noise enter the simulation through the visibility maps.
+
 
 ### Differences from Original Study
+
++ Sample: While the original study used data from non-naive participants (i.e. authors), this project will recruit naive participants. Given the relatively low-level nature of eye movement, it is expected that this discrepancy will not make crucial difference.
+
++ Setting: This project used an advanced technology with respect to the resolution and the frame rates of monitor, and the eye-tracking device. However, considering that fixations are fairly easy to detect and relatively robust to location changes in the scale of stimuli in the original research, these settings will not make critical differences.
+
++ Procedure: Some hyperparameters for the model simulation will be different from the original study, since they were unspecified in the original study. This will make critical differences, since different hyperparameters will lead to different model simulations. I plan to contact the authors on model parameters to ensure using the same models.
+
++ Analysis plan: The main analysis will newly be constructed in this project, since the original study did not report any formal statistical testing. This can make crucial differences, since the original authors did not resort to this specific analysis for their conclusion. However, the main figure ([Figure 4a](#original_figure)) will be the target of replication, in which the difference between the random searcher model and the human behavior should be visually apparent.
+
+
+<!-- ### Methods Addendum (Post Data Collection) -->
+<!-- You can comment this section out prior to final report with data collection. -->
+
+<!-- #### Actual Sample
+  Sample size, demographics, data exclusions based on rules spelled out in analysis plan -->
+
+<!-- #### Differences from pre-data collection methods plan
+  Any differences from what was described as the original plan, or “none”. -->
+
+
+## Results
+
+### Data preparation
+
+Data preparation will be done using `Python`, and will be shared via GitHub.
+	
+```{r include=F}
+###Data Preparation
+
+####Load Relevant Libraries and Functions
+
+####Import data
+
+#### Data exclusion / filtering
+
+#### Prepare data for analysis - create columns etc.
+```
+
+### Confirmatory analysis
+
+The analyses will be performed in the following steps: 
+
++ **Searcher model simulation**
+
++ **Nested linear model comparison**
+
+Side-by-side comparison with the original figure (Figure 4a) will be provided:
+
+<p align="center"><img width=50% height=50% src="figures/figure_original.png"></p><a name="original_figure"></a>
+
+### Exploratory analyses
+
+Any follow-up analyses desired (not required).  
+
