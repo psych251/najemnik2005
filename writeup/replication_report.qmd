@@ -16,7 +16,7 @@ The experimental stimulus was a windowed sine-wave grating randomly positioned (
 #### Links
 -   [Project repository](https://github.com/psych251/najemnik2005)
 -   [Original paper](https://github.com/psych251/najemnik2005/blob/master/original_paper/najemnik2005.pdf)
--   [Experimental paradigm](https://hyunwoogu.github.io/exp/visual_search) (Demo-only. Under construction.)
+-   [Experimental paradigm](https://hyunwoogu.github.io/exp/visual_search) (For online demo. Main experiment will be done in-lab.)
 
 
 ## Methods
@@ -46,6 +46,8 @@ Quoted from the original paper:
 ### Analysis Plan<a name="key_analysis"></a>
 
 **Key analysis of interest**. I will test whether human participants' number of fixations differs from the prediction of the random searcher model, given different levels of search target visibility and background noise contrast. To test this, the nested linear model comparison will be used as follows.
+
+<a name="model"></a>
 
 + Null linear model: $(\mathrm{\#Fixations}) \sim (\mathrm{Target\ \ visibility}) \ast (\mathrm{Noise\ \ contrast})$
 + Full linear model: $(\mathrm{\#Fixations}) \sim (\mathrm{Target\ \ visibility}) \ast (\mathrm{Noise\ \ contrast}) \ast (\mathrm{Searcher})$
@@ -99,33 +101,82 @@ where $p(C \vert i, k(T+1))$: the probability of correct identification of the t
 
 ### Data preparation
 
-Data preparation will be done using `Python`, and will be shared via GitHub.
+For pilot A, I used an incomplete setting as follows due to the limited time. 
+
++ Data from myself ($N=1$) was collected. 
++ Preliminary visibility calibration was ad-hoc (*i.e.*, less than $15$ calibration trials used).<a name="visibility"></a>
+
++ One noise contrast condition (0.2, blue) was used (thus, [contrast term](#model) not considered).
++ Searcher model predictions were read-out from the original paper.
+
 	
-```{r include=F}
-###Data Preparation
+```{r}
+# Data Preparation
+## Load Relevant Libraries and Functions
+library(tidyverse)
 
-####Load Relevant Libraries and Functions
+## Import data
+data_searcher = read.csv('../data/pilot_a/searcher_behavior.csv') # model searchers from the original paper
+data_human    = read.csv('../data/pilot_a/human_behavior.csv')    # human searcher (n=1)
+data_eye      = read.csv('../data/pilot_a/eye_track.csv')         # human eye fixation time-series data
 
-####Import data
+## Data exclusion / filtering
+### compute n_fixations from eye-tracking data
+n_trial = nrow(data_human)
+n_fix   = vector(length=n_trial)
+for (i_trial in 1:nrow(data_human)){
+  # number of fixations = 1 + fixation onsets between stimulus onset & target detection
+  n_fix[i_trial] = 1 + sum(
+      (data_eye$t_start >= data_human$t_onset[i_trial]) &
+      (data_eye$t_start <= data_human$t_detect[i_trial])
+  )
+}
+### exclude the ideal searcher model for the main linear model comparison
+data_compare = data_searcher %>% filter(searcher=='random')
 
-#### Data exclusion / filtering
-
-#### Prepare data for analysis - create columns etc.
+## Prepare data for analysis - create columns etc.
+data_human_compare = data.frame( 
+  visibility = data_human$visibility,
+  searcher   = 'human',
+  n_fixation = n_fix
+)
+data_compare = rbind(data_compare, data_human_compare)
 ```
 
 ### Confirmatory analysis
 
-The analyses will be performed in the following steps: 
+**Searcher model simulation**. Searcher model predictions are yet to be fully implemented. For the pilot A, the read-out values from the original paper were used for the following model comparison.
 
-+ **Searcher model simulation**
+**Nested linear model comparison**. As previously specified, the nested linear model comparison was performed to test whether my number of fixations differs from the prediction of the random searcher model, given different levels of search target visibility.
 
-+ **Nested linear model comparison**
+```{r}
+null = lm(n_fixation ~ visibility, data=data_compare)
+full = lm(n_fixation ~ visibility*searcher, data=data_compare)
 
-Side-by-side comparison with the original figure (Figure 4a) will be provided:
+# summary of each model
+summary(null)
+summary(full)
+anova(null, full)
+```
+
+Here, I observed that the full model led to a significantly improved fit over the null model, implying that my pilot data differs the random searcher behavior. An effect size will be calculated afterwards, with the mixed effects across paricipants considered.
+
+**Figure**. When I side-by-side compared the relationship between number of fixations and visibility, a pattern was observed: the behavioral fixations performed better than the ideal model, which is contradictory to the original paper. I suspect that this is due to the poor measurement of the [visibility](#visibility), underestimating the measurements on the abscissa. I plan to work more on the reliable measurement of visibility.
+
+```{r}
+data_human_compare %>% 
+  ggplot(aes(x=visibility, y=n_fixation)) +
+  stat_summary(color='blue', fun.data=mean_se) + 
+  geom_line(data=data_searcher, aes(linetype=searcher), color='blue') + 
+  coord_cartesian(xlim=c(3,7), ylim=c(0,20)) +
+  xlab("Foveal target visibility (d', estimated)") + ylab("Number of fixations") +
+  theme_classic()
+```
+
+Figure 4a of the original paper:
 
 <p align="center"><img width=50% height=50% src="figures/figure_original.png"></p><a name="original_figure"></a>
 
 ### Exploratory analyses
 
-Any follow-up analyses desired (not required).  
-
+A secondary analysis to compare whether participants' behavior differs from the prediction of the ideal searcher model will be performed soon.
