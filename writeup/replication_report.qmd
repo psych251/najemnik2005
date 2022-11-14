@@ -101,7 +101,7 @@ where $p(C \vert i, k(T+1))$: the probability of correct identification of the t
 
 ### Data preparation
 
-For pilot A, I used an incomplete setting as follows due to the limited time. 
+For pilot A, I used an incomplete settin1g as follows due to the limited time. 
 
 + Data from myself ($N=1$) was collected. 
 + Preliminary visibility calibration was ad-hoc (*i.e.*, less than $15$ calibration trials used).<a name="visibility"></a>
@@ -145,7 +145,7 @@ data_compare = rbind(data_compare, data_human_compare)
 
 ### Confirmatory analysis
 
-**Searcher model simulation**. Searcher model predictions are yet to be fully implemented. For the pilot A, the read-out values from the original paper were used for the following model comparison.
+**Searcher model simulation**. Searcher model predictions are yet to be fully implemented. For pilot A, the read-out values from the original paper were used for the following model comparison.
 
 **Nested linear model comparison**. As previously specified, the nested linear model comparison was performed to test whether my number of fixations differs from the prediction of the random searcher model, given different levels of search target visibility.
 
@@ -159,9 +159,9 @@ summary(full)
 anova(null, full)
 ```
 
-Here, I observed that the full model led to a significantly improved fit over the null model, implying that my pilot data differs the random searcher behavior. An effect size will be calculated afterwards, with the mixed effects across paricipants considered.
+Here, I observed that the full model led to a significantly improved fit over the null model, implying that my pilot data differs from the random searcher behavior. An effect size will be calculated afterward, with the mixed effects across participants considered.
 
-**Figure**. When I side-by-side compared the relationship between number of fixations and visibility, a pattern was observed: the behavioral fixations performed better than the ideal model, which is contradictory to the original paper. I suspect that this is due to the poor measurement of the [visibility](#visibility), underestimating the measurements on the abscissa. I plan to work more on the reliable measurement of visibility.
+**Figure**. When I side-by-side compared the relationship between the number of fixations and visibility, a pattern was observed: the behavioral fixations performed better than the ideal model, which is contradictory to the original paper. I suspect that this is due to the poor measurement of the [visibility](#visibility), underestimating the measurements on the abscissa. I plan to work more on the reliable measurement of visibility.
 
 ```{r}
 data_human_compare %>% 
