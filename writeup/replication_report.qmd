@@ -17,6 +17,7 @@ The experimental stimulus was a windowed sine-wave grating randomly positioned (
 -   [Project repository](https://github.com/psych251/najemnik2005)
 -   [Original paper](https://github.com/psych251/najemnik2005/blob/master/original_paper/najemnik2005.pdf)
 -   [Experimental paradigm](https://hyunwoogu.github.io/exp/visual_search) (For online demo. Main experiment will be done in-lab.)
+-   [Preregistration](https://hyunwoogu.github.io/exp/visual_search) (For online demo. Main experiment will be done in-lab.)
 
 
 ## Methods
@@ -101,7 +102,7 @@ where $p(C \vert i, k(T+1))$: the probability of correct identification of the t
 
 ### Data preparation
 
-For pilot A, I used an incomplete settin1g as follows due to the limited time. 
+For pilot A, I used an incomplete setting as follows due to the limited time. 
 
 + Data from myself ($N=1$) was collected. 
 + Preliminary visibility calibration was ad-hoc (*i.e.*, less than $15$ calibration trials used).<a name="visibility"></a>
@@ -116,20 +117,25 @@ For pilot A, I used an incomplete settin1g as follows due to the limited time.
 library(tidyverse)
 
 ## Import data
-data_searcher = read.csv('../data/pilot_a/searcher_behavior.csv') # model searchers from the original paper
-data_human    = read.csv('../data/pilot_a/human_behavior.csv')    # human searcher (n=1)
-data_eye      = read.csv('../data/pilot_a/eye_track.csv')         # human eye fixation time-series data
+# data_searcher = read.csv('../data/pilot_a/searcher_behavior.csv') # model searchers from the original paper
+# data_human    = read.csv('../data/pilot_a/human_behavior.csv')    # human searcher (n=1)
+# data_eye      = read.csv('../data/pilot_a/eye_track.csv')         # human eye fixation time-series data
+
+data_searcher = read.csv('/Users/hyunwoogu/Dropbox/courses/Graduate/2022/2022Autumn/PSYCH251/assignments/najemnik2005/writeup/data/pilot_a/searcher_behavior.csv') 
+data_human    = read.csv('/Users/hyunwoogu/Dropbox/human_behavior005.csv')    # human searcher (n=1)
+data_eye      = read.csv('/Users/hyunwoogu/Dropbox/eye_track005.csv')         # human eye fixation time-series data
+
 
 ## Data exclusion / filtering
 ### compute n_fixations from eye-tracking data
 n_trial = nrow(data_human)
 n_fix   = vector(length=n_trial)
 for (i_trial in 1:nrow(data_human)){
-  # number of fixations = 1 + fixation onsets between stimulus onset & target detection
-  n_fix[i_trial] = 1 + sum(
+  # number of fixations = fixation onsets between stimulus onset & target detection - 1 (initial fixation)
+  n_fix[i_trial] = sum(
       (data_eye$t_start >= data_human$t_onset[i_trial]) &
       (data_eye$t_start <= data_human$t_detect[i_trial])
-  )
+  ) - 1
 }
 ### exclude the ideal searcher model for the main linear model comparison
 data_compare = data_searcher %>% filter(searcher=='random')
@@ -169,7 +175,7 @@ data_human_compare %>%
   stat_summary(color='blue', fun.data=mean_se) + 
   geom_line(data=data_searcher, aes(linetype=searcher), color='blue') + 
   coord_cartesian(xlim=c(3,7), ylim=c(0,20)) +
-  xlab("Foveal target visibility (d', estimated)") + ylab("Number of fixations") +
+  xlab("Foveal target visibility (d')") + ylab("Number of fixations") +
   theme_classic()
 ```
 
