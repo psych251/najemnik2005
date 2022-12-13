@@ -4,7 +4,7 @@ A replication study of a visual search experiment by Najemnik & Geisler (2005, N
 
 + [Replication report](https://rpubs.com/hwgu/najemnik2005)
 + [Experiment demo](https://hyunwoogu.github.io/exp/visual_search)
-+ [Preregistration](https://rpubs.com/hwgu/najemnik2005)
++ [Preregistration](https://osf.io/ezhvy)
 
 ---
 ### Reference
