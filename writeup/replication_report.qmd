@@ -110,7 +110,7 @@ f(c) = 0.5 + 0.5\left[1-\mathrm{exp}(-(c/c_T)^s)\right]
 $$
 Both the $82\%$ correct threshold parameter $c_T$ and the steepness parameter $s$ were estimated by using maximum-likelihood methods.
 
-Code for mapping each of the  $d'$ values ($3,3.5,4,5,6,7$) to target contrast levels can be found in the following [Jupyter notebook](https://github.com/psych251/najemnik2005). These levels were used for target contrasts in the main experiment.
+Code for mapping each of the  $d'$ values ($3,3.5,4,5,6,7$) to target contrast levels can be found in the following [Jupyter notebook](https://github.com/psych251/najemnik2005/blob/master/analysis/visibility_map.ipynb). These levels were used for target contrasts in the main experiment.
 
 ## Results
 
@@ -118,7 +118,7 @@ Code for mapping each of the  $d'$ values ($3,3.5,4,5,6,7$) to target contrast l
 
 Initial data preparation included two parts:
 
--   **Human data pre-processing** ([Jupyter notebook](https://github.com/psych251/najemnik2005)): basic sanity checks for human searcher eye-tracking data, and the transformation into a 'tidy' format.
+-   **Human data pre-processing** ([Jupyter notebook](https://github.com/psych251/najemnik2005/blob/master/analysis/preprocess_data.ipynb)): basic sanity checks for human searcher eye-tracking data, and the transformation into a 'tidy' format.
 -   **Model data generation** ([Jupyter notebook](https://github.com/psych251/najemnik2005/blob/master/model/model.ipynb)): implementation of the model based on the original authors' parameter values, and the transformation of the simulated model searcher (ideal, random) behaviors into a 'tidy' format.
 	
 	
