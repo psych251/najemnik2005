@@ -16,7 +16,7 @@ The experimental stimulus was a windowed sine-wave grating randomly positioned (
 #### Links
 -   [Project repository](https://github.com/psych251/najemnik2005)
 -   [Original paper](https://github.com/psych251/najemnik2005/blob/master/original_paper/najemnik2005.pdf)
--   [Experimental paradigm](https://hyunwoogu.github.io/exp/visual_search) (For online demo. Main experiment will be done in-lab.)
+-   [Experimental paradigm](https://hyunwoogu.github.io/exp/visual_search) (For online demo. Main experiment done in-lab.)
 -   [Preregistration](https://osf.io/ezhvy/)
 
 
@@ -89,27 +89,38 @@ where $p(C \vert i, k(T+1))$: the probability of correct identification of the t
 
 
 ### Methods Addendum (Post Data Collection)
-You can comment this section out prior to final report with data collection.
 
-<!-- #### Actual Sample
-  Sample size, demographics, data exclusions based on rules spelled out in analysis plan -->
+#### Actual Sample
+The actual sample size was $N=2$ as specified in the analysis plan. Participants were given unidentifiable IDs, namely, A and B. Since no participant met the pre-specified exclusion criteria of psychophysical performance, all the data from both participants were included. 
 
-<!-- #### Differences from pre-data collection methods plan
-  Any differences from what was described as the original plan, or “none”. -->
+#### Differences from pre-data collection methods plan
+**Monitor specification**. Instead of the Dell Trinitron CRT monitor, the VPixx monitor with the resolution of $1920\times1080$ pixels at $120$Hz was used.
 
+**Calibration**. Due to the compatibility issues between Metal-based psychophysics software (MGL) and eye-tracker, performing eye-tracking calibration was particularly challenging. Thus, the calibration was performed only once before the visual search experiment, and I instructed participants to try not to make head movements during the experiment. 
+
+**Measuring $d'$**. Mapping the $d'$ values to the participant-specific sets of target contrast levels required performing separate pre-experimental 'detection tasks', as quoted from the original paper:
+
+> On each trial, the observer fixated a dot at the centre of the display (there was no fixation dot for foveal measurements). The fixation dot disappeared at the onset of the test stimuli, which consisted of two 250-ms intervals separated by 500 ms. One interval contained background noise alone, the other a different random sample of background noise with the target added. The observer judged which interval contained the target. If the observer’s fixation was not within 0.758 of the fixation dot when the test stimuli appeared, the trial was discarded. Within a session the target always appeared in the same location, which was indicated after each trial. Sixteen blocks ($4$ target contrasts $\times$ $4$ noise levels) of 32 trials were run in each session.
+
+Deviating from the original paper (which requires $25\times512 = 12,800$ trials), the detection tasks were performed only for (two locations $\times$ two noise levels) of $280$ trials with staircase-based contrast levels, resulting in $4\times280=1,120$ trials in total. Estimating the subject-specific visibility map from the detection data was based on the psychometric function as quoted below:
+
+> The data for each noise level, in each session, were fitted with a Weibull function:
+$$
+f(c) = 0.5 + 0.5\left[1-\mathrm{exp}(-(c/c_T)^s)\right]
+$$
+Both the $82\%$ correct threshold parameter $c_T$ and the steepness parameter $s$ were estimated by using maximum-likelihood methods.
+
+Code for mapping each of the  $d'$ values ($3,3.5,4,5,6,7$) to target contrast levels can be found in the following [Jupyter notebook](https://github.com/psych251/najemnik2005). These levels were used for target contrasts in the main experiment.
 
 ## Results
 
 ### Data preparation
 
-For pilot A, I used an incomplete setting as follows due to the limited time. 
+Initial data preparation included two parts:
 
-+ Data from myself ($N=1$) was collected. 
-+ Preliminary visibility calibration was ad-hoc (*i.e.*, less than $15$ calibration trials used).<a name="visibility"></a>
-
-+ One noise contrast condition (0.2, blue) was used (thus, [contrast term](#model) not considered).
-+ Searcher model predictions were read-out from the original paper.
-
+-   **Human data pre-processing** ([Jupyter notebook](https://github.com/psych251/najemnik2005)): basic sanity checks for human searcher eye-tracking data, and the transformation into a 'tidy' format.
+-   **Model data generation** ([Jupyter notebook](https://github.com/psych251/najemnik2005/blob/master/model/model.ipynb)): implementation of the model based on the original authors' parameter values, and the transformation of the simulated model searcher (ideal, random) behaviors into a 'tidy' format.
+	
 	
 ```{r}
 # Data Preparation
@@ -123,12 +134,13 @@ data_eye      = read.csv('data/main/eye_track.csv')         # human eye fixation
 
 ## Data exclusion / filtering
 ### compute n_fixations from eye-tracking data
+t_fix   = 1e-2  # small time value to suppress counting the initial fixation
 n_trial = nrow(data_human)
 n_fix   = vector(length=n_trial)
 for (i_trial in 1:nrow(data_human)){
   # number of fixations = fixation onsets between stimulus onset & target detection
   n_fix[i_trial] = sum(
-      (data_eye$t_start >= data_human$t_onset[i_trial]) &
+      (data_eye$t_start >= data_human$t_onset[i_trial] + t_fix) &
       (data_eye$t_start <= data_human$t_detect[i_trial])
   )
 }
@@ -136,7 +148,7 @@ for (i_trial in 1:nrow(data_human)){
 ### exclude the ideal searcher model for the main linear model comparison
 ### summarize the searcher prediction
 data_searcher$noise = as.factor(data_searcher$noise)
-data_compare = data_searcher %>% select(visibility, noise, searcher, n_fixation)
+data_compare = data_searcher %>% select(visibility, noise, searcher, n_fixation) %>% filter(searcher=='random')
 
 ## Prepare data for analysis - create columns etc.
 data_human_compare = data.frame( 
@@ -146,13 +158,15 @@ data_human_compare = data.frame(
   n_fixation = n_fix
 )
 data_compare = rbind(data_compare, data_human_compare)
+data_compare = data_compare %>% mutate(searcher = ifelse(searcher=='random', 'random', 'human')) # collapse human observers for linear model comparison
+data_compare = data_compare %>% filter(visibility>=3, visibility<=7) # original study visibility range
 ```
 
 ### Confirmatory analysis
 
-**Searcher model simulation**. Searcher model predictions are yet to be fully implemented. For pilot A, the read-out values from the original paper were used for the following model comparison.
+**Searcher model simulation**. Searcher model predictions were fully implemented using the original authors' parameter values. These predictions were overlaid on the human searcher data in the [replicated figure](#replication_figure), and included in the data to be used for the main statistical analysis.
 
-**Nested linear model comparison**. As previously specified, the nested linear model comparison was performed to test whether my number of fixations differs from the prediction of the random searcher model, given different levels of search target visibility.
+**Nested linear model comparison**. As previously specified, the nested linear model comparison was performed to test whether the number of fixations differs from the prediction of the random searcher model, given different levels of search target visibility and background noise.
 
 ```{r}
 null = lm(n_fixation ~ visibility*noise, data=data_compare)
@@ -161,34 +175,23 @@ full = lm(n_fixation ~ visibility*noise*searcher, data=data_compare)
 # summary of each model
 summary(null)
 summary(full)
+
 anova(null, full)
+print(paste("Δeta-squared:", summary(full)$r.squared - summary(null)$r.squared))
 ```
 
-Here, I observed that the full model led to a significantly improved fit over the null model, implying that my pilot data differs from the random searcher behavior. An effect size will be calculated afterward, with the mixed effects across participants considered.
+Here, the full model led to a significantly improved fit over the null model, implying that the data differs from the random searcher behavior. Specifically, the null model's $\eta^2$ was `r round(summary(null)$r.squared,3)` and the full model's $\eta^2$ was `r round(summary(full)$r.squared,3)`, the difference being $\Delta \eta^2=$ `r round(summary(full)$r.squared-summary(null)$r.squared,3)`.
 
-**Figure**. When I side-by-side compared the relationship between the number of fixations and visibility, a pattern was observed: the behavioral fixations performed better than the ideal model, which is contradictory to the original paper. I suspect that this is due to the poor measurement of the [visibility](#visibility), underestimating the measurements on the abscissa. I plan to work more on the reliable measurement of visibility.
+**Figure**. To visually inspect the comparison between the original paper and the replication, the behavioral number of fixations was plotted for each participant and background noise, as a function of target contrast levels (converted into $d'$). 
 
+<a name="replication_figure"></a>
 
 ```{r}
 data_human_compare %>% 
   ggplot(aes(x=visibility, y=n_fixation)) +
   stat_summary(fun.data=mean_se, aes(color=noise, shape=searcher)) + 
   stat_summary(data=data_searcher, fun.data=mean_se, geom='ribbon', alpha=0.15, aes(fill=noise, linetype=searcher)) + 
-  stat_summary(data=data_searcher, fun.data=mean_se, geom='line', size=0.5, aes(fill=noise, color=noise, linetype=searcher)) + 
-  coord_cartesian(xlim=c(3,7), ylim=c(0,20)) +
-  xlab("Foveal target visibility (d')") + ylab("Number of fixations") +
-  scale_color_manual(name='Noise level', values=c('red', 'blue')) +
-  scale_fill_manual(name='Noise level', values=c('red', 'blue')) +
-  scale_shape_manual(name='Searcher (human)', values=c(1,16)) +
-  scale_linetype_manual(name='Searcher (model)', values=c('solid', 'dashed')) +
-  theme_classic()
-```
-```{r}
-data_searcher %>% 
-  ggplot(aes(x=visibility, y=n_fixation)) +
-  # stat_summary(fun.data=mean_se, aes(color=noise, shape=searcher)) + 
-  stat_summary(data=data_searcher, fun.data=mean_se, geom='ribbon', alpha=0.15, aes(fill=noise, linetype=searcher)) + 
-  stat_summary(data=data_searcher, fun.data=mean_se, geom='line', size=0.5, aes(fill=noise, color=noise, linetype=searcher)) + 
+  stat_summary(data=data_searcher, fun.data=mean_se, geom='line', size=0.5, aes(color=noise, linetype=searcher)) + 
   coord_cartesian(xlim=c(3,7), ylim=c(0,20)) +
   xlab("Foveal target visibility (d')") + ylab("Number of fixations") +
   scale_color_manual(name='Noise level', values=c('red', 'blue')) +
@@ -202,6 +205,37 @@ Figure 4a of the original paper:
 
 <p align="center"><img width=50% height=50% src="figures/figure_original.png"></p><a name="original_figure"></a>
 
+
 ### Exploratory analyses
 
-A secondary analysis to compare whether participants' behavior differs from the prediction of the ideal searcher model will be performed soon.
+In the main analysis, human behavior was compared against the random searcher model. Here, an exploratory analysis was done to compare human behavior to the ideal searcher model. 
+
+```{r}
+data_compare_ideal = data_searcher %>% select(visibility, noise, searcher, n_fixation) %>% filter(searcher=='ideal')
+data_compare_ideal = rbind(data_compare_ideal, data_human_compare)
+data_compare_ideal = data_compare_ideal %>% mutate(searcher = ifelse(searcher=='ideal', 'ideal', 'human')) # collapse human observers for linear model comparison
+data_compare_ideal = data_compare_ideal %>% filter(visibility>=3, visibility<=7) # original study visibility range
+
+null_ideal = lm(n_fixation ~ visibility*noise, data=data_compare_ideal)
+full_ideal = lm(n_fixation ~ visibility*noise*searcher, data=data_compare_ideal)
+
+# summary of each model
+summary(null_ideal)
+summary(full_ideal)
+
+anova(null_ideal, full_ideal)
+print(paste("Δeta-squared:", summary(full_ideal)$r.squared - summary(null_ideal)$r.squared))
+```
+
+Here, the full model led to a significantly improved fit over the null model, implying that the data differs from the **ideal searcher behavior**. Specifically, the null model's $\eta^2$ was `r round(summary(null_ideal)$r.squared,3)` and the full model's $\eta^2$ was `r round(summary(full_ideal)$r.squared,3)`, the difference being $\Delta \eta^2=$ `r round(summary(full_ideal)$r.squared-summary(null_ideal)$r.squared,3)`.
+
+
+## Discussion
+
+### Summary of Reproduction Attempt
+Overall, the main hypothesis (difference between the human search performance versus random searcher performance) was supported in this replication project, by hierarchical linear model comparison. In this aspect, this attempt successfully reproduced the original study.
+
+### Commentary
+While supporting the main hypothesis, the exploratory analysis revealed that human performance significantly deviated from the ideal searcher prediction as well. Since no formal statistical testing was performed in the original paper, an alternative formulation of a replication project may conclude that this is a failure of the replication of the original findings. This may strike as suspicious, as the ideal searcher model was intended to reveal a "normative" behavioral pattern.  
+
+It is worth noting that the lack of 'detection task' data in this replication attempt required for completely estimating a participant's visibility map might have resulted in the underestimation of the $d'$ value -- the abscissa -- for a given target contrast level, resulting in the supra-threshold psychophysical range. Intriguingly, a recent study by Zhou and Yu (2021, Communications Biology) using the same stimulus vignette reported the contrast range $[0.111,0.135]$ for the noise background $0.2$, while this replication study reports the contrast levels $0.188$ for A, and $0.19$ for B, for the same noise background condition. An interesting follow-up experiment, beyond the scope of this replication project, might be investigating the near-threshold behavior of visual search.
